@@ -1,0 +1,14 @@
+PODS:
+  - LGActionSheet (1.0.0)
+
+DEPENDENCIES:
+  - LGActionSheet (from `../`)
+
+EXTERNAL SOURCES:
+  LGActionSheet:
+    :path: ../
+
+SPEC CHECKSUMS:
+  LGActionSheet: 50b9d93a197cbcc270a21330a6799d1963f87bc1
+
+COCOAPODS: 0.37.2
