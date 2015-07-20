@@ -737,7 +737,7 @@ static CGFloat const kLGActionSheetButtonHeight         = 44.f;
     
     if (animated)
     {
-        [LGActionSheet animateStandartWithAnimations:^(void)
+        [LGActionSheet animateStandardWithAnimations:^(void)
          {
              [self showAnimations];
          }
@@ -816,7 +816,7 @@ static CGFloat const kLGActionSheetButtonHeight         = 44.f;
     
     if (animated)
     {
-        [LGActionSheet animateStandartWithAnimations:^(void)
+        [LGActionSheet animateStandardWithAnimations:^(void)
          {
              [self dismissAnimations];
          }
@@ -1238,7 +1238,7 @@ static CGFloat const kLGActionSheetButtonHeight         = 44.f;
 
 #pragma mark - Support
 
-+ (void)animateStandartWithAnimations:(void(^)())animations completion:(void(^)(BOOL finished))completion
++ (void)animateStandardWithAnimations:(void(^)())animations completion:(void(^)(BOOL finished))completion
 {
     if ([UIDevice currentDevice].systemVersion.floatValue >= 7.0)
     {
