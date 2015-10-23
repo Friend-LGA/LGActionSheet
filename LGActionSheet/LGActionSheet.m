@@ -135,7 +135,7 @@ static CGFloat const kLGActionSheetButtonTitleMarginH   = 8.f;
     return window.currentViewController.shouldAutorotate;
 }
 
-- (NSUInteger)supportedInterfaceOrientations
+- (UIInterfaceOrientationMask)supportedInterfaceOrientations
 {
     UIWindow *window = [UIApplication sharedApplication].delegate.window;
 
