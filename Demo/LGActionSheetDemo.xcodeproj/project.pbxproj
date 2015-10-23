@@ -12,6 +12,7 @@
 		4A4B5FB51ACAF0D50011B96C /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4A4B5FB41ACAF0D50011B96C /* Images.xcassets */; };
 		4A55F2AB1ACC3E8B00CCC9B8 /* NavigationController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4A55F2A81ACC3E8B00CCC9B8 /* NavigationController.m */; };
 		4A55F2AC1ACC3E8B00CCC9B8 /* TableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4A55F2AA1ACC3E8B00CCC9B8 /* TableViewController.m */; };
+		4ABF191A1BDA891200A12B6E /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4ABF19191BDA891100A12B6E /* LaunchScreen.storyboard */; settings = {ASSET_TAGS = (); }; };
 		82FA7780FBA6858314165260 /* libPods-LGActionSheetDemo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E0532CD02B33FA2C2F39BC85 /* libPods-LGActionSheetDemo.a */; };
 /* End PBXBuildFile section */
 
@@ -26,6 +27,7 @@
 		4A55F2A81ACC3E8B00CCC9B8 /* NavigationController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NavigationController.m; sourceTree = "<group>"; };
 		4A55F2A91ACC3E8B00CCC9B8 /* TableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TableViewController.h; sourceTree = "<group>"; };
 		4A55F2AA1ACC3E8B00CCC9B8 /* TableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TableViewController.m; sourceTree = "<group>"; };
+		4ABF19191BDA891100A12B6E /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		7CC2AAB04F8AFE386AF77ADE /* Pods-LGActionSheetDemo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LGActionSheetDemo.release.xcconfig"; path = "Pods/Target Support Files/Pods-LGActionSheetDemo/Pods-LGActionSheetDemo.release.xcconfig"; sourceTree = "<group>"; };
 		B3B3654F3CBED5671679D0BD /* Pods-LGActionSheetDemo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LGActionSheetDemo.debug.xcconfig"; path = "Pods/Target Support Files/Pods-LGActionSheetDemo/Pods-LGActionSheetDemo.debug.xcconfig"; sourceTree = "<group>"; };
 		E0532CD02B33FA2C2F39BC85 /* libPods-LGActionSheetDemo.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-LGActionSheetDemo.a"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -80,6 +82,7 @@
 				4A55F2AA1ACC3E8B00CCC9B8 /* TableViewController.m */,
 				4A4B5FB41ACAF0D50011B96C /* Images.xcassets */,
 				4A4B5FA71ACAF0D50011B96C /* Supporting Files */,
+				4ABF19191BDA891100A12B6E /* LaunchScreen.storyboard */,
 			);
 			path = LGActionSheetDemo;
 			sourceTree = "<group>";
@@ -114,6 +117,7 @@
 				4A4B5FA11ACAF0D50011B96C /* Frameworks */,
 				4A4B5FA21ACAF0D50011B96C /* Resources */,
 				9266E7BCEA5B7991ADA2CD7D /* Copy Pods Resources */,
+				D74A5CE724B3A62700CC3264 /* Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -130,7 +134,7 @@
 		4A4B5F9C1ACAF0D50011B96C /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0620;
+				LastUpgradeCheck = 0700;
 				ORGANIZATIONNAME = "Grigory Lutkov";
 				TargetAttributes = {
 					4A4B5FA31ACAF0D50011B96C = {
@@ -161,6 +165,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4ABF191A1BDA891200A12B6E /* LaunchScreen.storyboard in Resources */,
 				4A4B5FB51ACAF0D50011B96C /* Images.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -196,6 +201,21 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		D74A5CE724B3A62700CC3264 /* Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-LGActionSheetDemo/Pods-LGActionSheetDemo-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -235,6 +255,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -302,6 +323,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				INFOPLIST_FILE = LGActionSheetDemo/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.test.$(PRODUCT_NAME)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -315,6 +337,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				INFOPLIST_FILE = LGActionSheetDemo/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.test.$(PRODUCT_NAME)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;

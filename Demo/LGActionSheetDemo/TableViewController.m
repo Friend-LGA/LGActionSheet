@@ -23,7 +23,7 @@
     if (self)
     {
         self.title = @"LGActionSheet";
-        
+
         _titlesArray = @[@"UIActionSheet",
                          @"LGActionSheet + UIView",
                          @"LGActionSheet + Buttons Short",
@@ -33,7 +33,7 @@
                          @"LGActionSheet + Buttons (a lot of) 2",
                          @"LGActionSheet + No cancel gesture",
                          @"LGActionSheet + Crazy style"];
-                
+
         [self.tableView registerClass:[UITableViewCell class] forCellReuseIdentifier:@"cell"];
     }
     return self;
@@ -56,10 +56,10 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"cell"];
-    
+
     cell.textLabel.font = [UIFont systemFontOfSize:16.f];
     cell.textLabel.text = _titlesArray[indexPath.row];
-    
+
     return cell;
 }
 
@@ -82,7 +82,7 @@
     {
         UIDatePicker *datePicker = [UIDatePicker new];
         datePicker.frame = CGRectMake(0.f, 0.f, datePicker.frame.size.width, 100.f);
-        
+
         [[[LGActionSheet alloc] initWithTitle:@"Choose any date, please"
                                          view:datePicker
                                  buttonTitles:@[@"Done"]
@@ -128,7 +128,7 @@
     }
     else if (indexPath.row == 5)
     {
-        [[[LGActionSheet alloc] initWithTitle:@"A lot of buttons, scroll it, if you can"
+        [[[LGActionSheet alloc] initWithTitle:@"A lot of buttons, scroll it"
                                  buttonTitles:@[@"Other 1",
                                                 @"Other 2",
                                                 @"Other 3",
@@ -142,7 +142,17 @@
                                                 @"Other 12",
                                                 @"Other 13",
                                                 @"Other 14",
-                                                @"Other 15"]
+                                                @"Other 15",
+                                                @"Other 16",
+                                                @"Other 17",
+                                                @"Other 18",
+                                                @"Other 19",
+                                                @"Other 20",
+                                                @"Other 21",
+                                                @"Other 22",
+                                                @"Other 23",
+                                                @"Other 24",
+                                                @"Other 25"]
                             cancelButtonTitle:@"Cancel"
                        destructiveButtonTitle:@"Destructive"
                                 actionHandler:nil
@@ -172,7 +182,6 @@
                                                             cancelHandler:nil
                                                        destructiveHandler:nil];
         actionSheet.heightMax = 200.f;
-        actionSheet.colorful = NO;
         [actionSheet showAnimated:YES completionHandler:nil];
     }
     else if (indexPath.row == 7)
@@ -190,44 +199,46 @@
     else if (indexPath.row == 8)
     {
         LGActionSheet *actionSheet = [[LGActionSheet alloc] initWithTitle:@"CRAZY STYLE\nMay be someone like it?"
-                                                       buttonTitles:@[@"Awesome Button"]
-                                                  cancelButtonTitle:@"Cancel"
-                                             destructiveButtonTitle:@"Destructive"
-                                                      actionHandler:nil
-                                                      cancelHandler:nil
-                                                 destructiveHandler:nil];
-        
+                                                             buttonTitles:@[@"Cancel"]
+                                                        cancelButtonTitle:nil
+                                                   destructiveButtonTitle:@"Destructive"
+                                                            actionHandler:nil
+                                                            cancelHandler:nil
+                                                       destructiveHandler:nil];
+
         actionSheet.backgroundColor = [UIColor colorWithWhite:1.f alpha:0.8];
-        
+        actionSheet.offsetAround = 0;
+        actionSheet.buttonsHeight = 64.f;
+
         actionSheet.backgroundColor = [UIColor colorWithWhite:0.3 alpha:0.8];
         actionSheet.layerBorderWidth = 1.f;
         actionSheet.layerBorderColor = [UIColor redColor];
         actionSheet.layerCornerRadius = 0.f;
         actionSheet.layerShadowColor = [UIColor colorWithWhite:0.f alpha:0.5];
         actionSheet.layerShadowRadius = 5.f;
-        
+
         actionSheet.titleTextAlignment = NSTextAlignmentLeft;
         actionSheet.titleTextColor = [UIColor whiteColor];
-        
+
         actionSheet.separatorsColor = [UIColor colorWithWhite:0.6 alpha:1.f];
-        
+
         actionSheet.tintColor = [UIColor greenColor];
-        
+
         actionSheet.buttonsTitleColorHighlighted = [UIColor blackColor];
-        
+
         actionSheet.cancelButtonTitleColor = [UIColor cyanColor];
         actionSheet.cancelButtonTitleColorHighlighted = [UIColor blackColor];
         actionSheet.cancelButtonBackgroundColorHighlighted = [UIColor cyanColor];
-        
+
         actionSheet.destructiveButtonTitleColor = [UIColor yellowColor];
         actionSheet.destructiveButtonTitleColorHighlighted = [UIColor blackColor];
         actionSheet.destructiveButtonBackgroundColorHighlighted = [UIColor yellowColor];
-        
+
         // And much more settings you can apply, check it in LGActionSheet class
-        
+
         [actionSheet showAnimated:YES completionHandler:nil];
     }
-    
+
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
 }
 

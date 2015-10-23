@@ -36,9 +36,6 @@ static NSString *const kLGActionSheetWillDismissNotification = @"LGActionSheetWi
 static NSString *const kLGActionSheetDidShowNotification     = @"LGActionSheetDidShowNotification";
 static NSString *const kLGActionSheetDidDismissNotification  = @"LGActionSheetDidDismissNotification";
 
-static CGFloat const kLGActionSheetMargin = 8.f;
-static CGFloat const kLGActionSheetWidth  = 320.f-kLGActionSheetMargin*2;
-
 @protocol LGActionSheetDelegate <NSObject>
 
 @optional
@@ -74,14 +71,16 @@ LGActionSheetTransitionStyle;
 @property (strong, nonatomic) UIColor *tintColor;
 @property (strong, nonatomic) UIColor *coverColor;
 @property (strong, nonatomic) UIColor *backgroundColor;
+@property (assign, nonatomic) CGFloat buttonsHeight;
+@property (assign, nonatomic) CGFloat offsetAround;
+@property (assign, nonatomic) CGFloat heightMax;
+@property (assign, nonatomic) CGFloat width;
+
 @property (assign, nonatomic) CGFloat layerCornerRadius;
 @property (strong, nonatomic) UIColor *layerBorderColor;
 @property (assign, nonatomic) CGFloat layerBorderWidth;
 @property (strong, nonatomic) UIColor *layerShadowColor;
 @property (assign, nonatomic) CGFloat layerShadowRadius;
-
-@property (assign, nonatomic) CGFloat heightMax;
-@property (assign, nonatomic) CGFloat widthMax;
 
 @property (strong, nonatomic) UIColor         *titleTextColor;
 @property (assign, nonatomic) NSTextAlignment titleTextAlignment;

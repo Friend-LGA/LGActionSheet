@@ -30,14 +30,14 @@
 #import "LGActionSheet.h"
 #import "LGActionSheetCell.h"
 
-#define kLGActionSheetSeparatorHeight ([UIScreen mainScreen].scale == 1.f || [UIDevice currentDevice].systemVersion.floatValue < 7.0 ? 1.f : 0.5)
+#define kLGActionSheetSeparatorHeight  ([UIScreen mainScreen].scale == 1.f || [UIDevice currentDevice].systemVersion.floatValue < 7.0 ? 1.f : 0.5)
+#define kLGActionSheetCornerRadius     (_layerCornerRadius >= 0.f ? _layerCornerRadius : (_transitionStyle == LGActionSheetTransitionStyleBottom ? ([UIDevice currentDevice].systemVersion.floatValue < 9.0 ? 4.f : 12.f) : ([UIDevice currentDevice].systemVersion.floatValue < 9.0 ? 6.f : 12.f)))
+#define kLGActionSheetOffsetAround     (_offsetAround >= 0.f ? _offsetAround : (_transitionStyle == LGActionSheetTransitionStyleBottom ? 8.f : 16.f))
+#define kLGActionSheetWidthTSCenter    (320.f - 16*2)
 
-static CGFloat const kLGActionSheetCornerRadiusTSBottom = 4.f;
-static CGFloat const kLGActionSheetCornerRadiusTSCenter = 8.f;
-static CGFloat const kLGActionSheetInnerMarginW         = 10.f;
-static CGFloat const kLGActionSheetTitleMarginH         = 10.f;
-static CGFloat const kLGActionSheetButtonTitleMarginH   = 5.f;
-static CGFloat const kLGActionSheetButtonHeight         = 44.f;
+static CGFloat const kLGActionSheetPaddingW             = 10.f;
+static CGFloat const kLGActionSheetTitleMarginH         = 12.f;
+static CGFloat const kLGActionSheetButtonTitleMarginH   = 8.f;
 
 @interface UIWindow (LGActionSheet)
 
@@ -101,10 +101,10 @@ static CGFloat const kLGActionSheetButtonHeight         = 44.f;
 - (UIViewController *)currentViewController
 {
     UIViewController *viewController = self.rootViewController;
-    
+
     if (viewController.presentedViewController)
         viewController = viewController.presentedViewController;
-    
+
     return viewController;
 }
 
@@ -119,9 +119,9 @@ static CGFloat const kLGActionSheetButtonHeight         = 44.f;
     {
         if ([UIDevice currentDevice].systemVersion.floatValue < 7.0)
             self.wantsFullScreenLayout = YES;
-        
+
         _actionSheet = actionSheet;
-        
+
         self.view.backgroundColor = [UIColor clearColor];
         [self.view addSubview:_actionSheet.view];
     }
@@ -131,14 +131,14 @@ static CGFloat const kLGActionSheetButtonHeight         = 44.f;
 - (BOOL)shouldAutorotate
 {
     UIWindow *window = [UIApplication sharedApplication].delegate.window;
-    
+
     return window.currentViewController.shouldAutorotate;
 }
 
 - (NSUInteger)supportedInterfaceOrientations
 {
     UIWindow *window = [UIApplication sharedApplication].delegate.window;
-    
+
     return window.currentViewController.supportedInterfaceOrientations;
 }
 
@@ -149,14 +149,14 @@ static CGFloat const kLGActionSheetButtonHeight         = 44.f;
 - (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration
 {
     [super willAnimateRotationToInterfaceOrientation:toInterfaceOrientation duration:duration];
-    
+
     CGSize size = self.view.frame.size;
-    
+
     if (UIInterfaceOrientationIsPortrait(toInterfaceOrientation))
         size = CGSizeMake(MIN(size.width, size.height), MAX(size.width, size.height));
     else
         size = CGSizeMake(MAX(size.width, size.height), MIN(size.width, size.height));
-    
+
     [_actionSheet layoutInvalidateWithSize:size];
 }
 
@@ -164,12 +164,12 @@ static CGFloat const kLGActionSheetButtonHeight         = 44.f;
 
 #if __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_8_0
 
-#pragma mark iOS == 8
+#pragma mark iOS >= 8
 
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
 {
     [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
-    
+
     [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext> context)
      {
          [_actionSheet layoutInvalidateWithSize:size];
@@ -195,7 +195,7 @@ static CGFloat const kLGActionSheetButtonHeight         = 44.f;
         _buttonTitles = buttonTitles.mutableCopy;
         _cancelButtonTitle = cancelButtonTitle;
         _destructiveButtonTitle = destructiveButtonTitle;
-        
+
         [self setupDefaults];
     }
     return self;
@@ -212,15 +212,15 @@ static CGFloat const kLGActionSheetButtonHeight         = 44.f;
     {
         if ([view isKindOfClass:[UIScrollView class]])
             NSLog(@"LGFilterView: WARNING !!! view can not be subclass of UIScrollView !!!");
-        
+
         // -----
-        
+
         _title = title;
         _innerView = view;
         _buttonTitles = buttonTitles.mutableCopy;
         _cancelButtonTitle = cancelButtonTitle;
         _destructiveButtonTitle = destructiveButtonTitle;
-        
+
         [self setupDefaults];
     }
     return self;
@@ -389,23 +389,29 @@ static CGFloat const kLGActionSheetButtonHeight         = 44.f;
 - (void)setupDefaults
 {
     _transitionStyle = (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone ? LGActionSheetTransitionStyleBottom : LGActionSheetTransitionStyleCenter);
-    
+
     _cancelOnTouch = YES;
-    
+
     self.tintColor = [UIColor colorWithRed:0.f green:0.5 blue:1.f alpha:1.f];
-    
+
     _coverColor = [UIColor colorWithWhite:0.f alpha:0.5];
     _backgroundColor = [UIColor whiteColor];
+
+    _buttonsHeight = ([UIDevice currentDevice].systemVersion.floatValue < 9.0 ? 44.f : 52.f);
+    _offsetAround = -1;
+    _heightMax = -1.f;
+    _width = -1.f;
+
     _layerCornerRadius = -1.f;
     _layerBorderColor = nil;
     _layerBorderWidth = 0.f;
     _layerShadowColor = nil;
     _layerShadowRadius = 0.f;
-    
+
     _titleTextColor     = [UIColor grayColor];
     _titleTextAlignment = NSTextAlignmentCenter;
     _titleFont          = [UIFont systemFontOfSize:16.f];
-    
+
     _buttonsTitleColor                 = _tintColor;
     _buttonsTitleColorHighlighted      = [UIColor whiteColor];
     _buttonsTextAlignment              = NSTextAlignmentCenter;
@@ -415,7 +421,7 @@ static CGFloat const kLGActionSheetButtonHeight         = 44.f;
     _buttonsAdjustsFontSizeToFitWidth  = YES;
     _buttonsMinimumScaleFactor         = 14.f/20.f;
     _buttonsBackgroundColorHighlighted = _tintColor;
-    
+
     _cancelButtonTitleColor                 = _tintColor;
     _cancelButtonTitleColorHighlighted      = [UIColor whiteColor];
     _cancelButtonTextAlignment              = NSTextAlignmentCenter;
@@ -425,7 +431,7 @@ static CGFloat const kLGActionSheetButtonHeight         = 44.f;
     _cancelButtonAdjustsFontSizeToFitWidth  = YES;
     _cancelButtonMinimumScaleFactor         = 14.f/20.f;
     _cancelButtonBackgroundColorHighlighted = _tintColor;
-    
+
     _destructiveButtonTitleColor                 = [UIColor redColor];
     _destructiveButtonTitleColorHighlighted      = [UIColor whiteColor];
     _destructiveButtonTextAlignment              = NSTextAlignmentCenter;
@@ -435,35 +441,35 @@ static CGFloat const kLGActionSheetButtonHeight         = 44.f;
     _destructiveButtonAdjustsFontSizeToFitWidth  = YES;
     _destructiveButtonMinimumScaleFactor         = 14.f/20.f;
     _destructiveButtonBackgroundColorHighlighted = [UIColor redColor];
-    
+
     self.colorful = YES;
-    
+
     _separatorsColor = [UIColor colorWithRed:0.85 green:0.85 blue:0.85 alpha:1.f];
-    
+
     _indicatorStyle = UIScrollViewIndicatorStyleBlack;
-    
+
     // -----
-    
+
     _view = [UIView new];
     _view.backgroundColor = [UIColor clearColor];
     _view.userInteractionEnabled = YES;
     _view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    
+
     _backgroundView = [UIView new];
     _backgroundView.alpha = 0.f;
     _backgroundView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     [_view addSubview:_backgroundView];
-    
+
     // -----
-    
+
     UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(cancelAction:)];
     tapGesture.delegate = self;
     [_backgroundView addGestureRecognizer:tapGesture];
-    
+
     // -----
-    
+
     _viewController = [[LGActionSheetViewController alloc] initWithActionSheet:self];
-    
+
     _window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
     _window.hidden = YES;
     _window.windowLevel = UIWindowLevelStatusBar+1;
@@ -480,7 +486,7 @@ static CGFloat const kLGActionSheetButtonHeight         = 44.f;
 #if DEBUG
     NSLog(@"%s [Line %d]", __PRETTY_FUNCTION__, __LINE__);
 #endif
-    
+
     [self removeObservers];
 }
 
@@ -501,9 +507,9 @@ static CGFloat const kLGActionSheetButtonHeight         = 44.f;
 - (void)windowVisibleChanged:(NSNotification *)notification
 {
     //NSLog(@"windowVisibleChanged: %@", notification);
-    
+
     UIWindow *window = notification.object;
-    
+
     if (notification.name == UIWindowDidBecomeVisibleNotification)
     {
         if ([window isEqual:_windowPrevious])
@@ -513,14 +519,14 @@ static CGFloat const kLGActionSheetButtonHeight         = 44.f;
         else if (![window isEqual:_window] && !_windowNotice)
         {
             _windowNotice = window;
-            
+
             _window.hidden = YES;
         }
     }
     else if (notification.name == UIWindowDidBecomeHiddenNotification)
     {
         __weak UIView *view = window.subviews.lastObject;
-        
+
         if (![window isEqual:_window] && [window isEqual:_windowNotice])
         {
             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^(void)
@@ -528,7 +534,7 @@ static CGFloat const kLGActionSheetButtonHeight         = 44.f;
                                if (!view)
                                {
                                    _windowNotice = nil;
-                                   
+
                                    [_window makeKeyAndVisible];
                                }
                            });
@@ -541,15 +547,15 @@ static CGFloat const kLGActionSheetButtonHeight         = 44.f;
 - (void)setColorful:(BOOL)colorful
 {
     _colorful = colorful;
-    
+
     if (_colorful)
     {
         _buttonsTitleColorHighlighted      = [UIColor whiteColor];
         _buttonsBackgroundColorHighlighted = _tintColor;
-        
+
         _cancelButtonTitleColorHighlighted      = [UIColor whiteColor];
         _cancelButtonBackgroundColorHighlighted = _tintColor;
-        
+
         _destructiveButtonTitleColorHighlighted      = [UIColor whiteColor];
         _destructiveButtonBackgroundColorHighlighted = [UIColor redColor];
     }
@@ -557,10 +563,10 @@ static CGFloat const kLGActionSheetButtonHeight         = 44.f;
     {
         _buttonsTitleColorHighlighted      = _buttonsTitleColor;
         _buttonsBackgroundColorHighlighted = [UIColor colorWithRed:0.9 green:0.9 blue:0.9 alpha:1.f];
-        
+
         _cancelButtonTitleColorHighlighted      = _cancelButtonTitleColor;
         _cancelButtonBackgroundColorHighlighted = [UIColor colorWithRed:0.9 green:0.9 blue:0.9 alpha:1.f];
-        
+
         _destructiveButtonTitleColorHighlighted      = _destructiveButtonTitleColor;
         _destructiveButtonBackgroundColorHighlighted = [UIColor colorWithRed:0.9 green:0.9 blue:0.9 alpha:1.f];
     }
@@ -569,18 +575,25 @@ static CGFloat const kLGActionSheetButtonHeight         = 44.f;
 - (void)setTintColor:(UIColor *)tintColor
 {
     _tintColor = tintColor;
-    
+
     _buttonsBackgroundColorHighlighted      = _tintColor;
     _cancelButtonBackgroundColorHighlighted = _tintColor;
-    
+
     _buttonsTitleColor      = _tintColor;
     _cancelButtonTitleColor = _tintColor;
-    
+
     if (!self.isColorful)
     {
         _buttonsTitleColorHighlighted      = _tintColor;
         _cancelButtonTitleColorHighlighted = _tintColor;
     }
+}
+
+- (void)setButtonsHeight:(CGFloat)buttonsHeight
+{
+    if (buttonsHeight < 0) buttonsHeight = 0;
+
+    _buttonsHeight = buttonsHeight;
 }
 
 #pragma mark - Table View Data Source
@@ -598,9 +611,9 @@ static CGFloat const kLGActionSheetButtonHeight         = 44.f;
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     LGActionSheetCell *cell = [tableView dequeueReusableCellWithIdentifier:@"cell"];
-    
+
     cell.title = _buttonTitles[indexPath.row];
-    
+
     if (_destructiveButtonTitle.length && indexPath.row == 0)
     {
         cell.titleColor                 = _destructiveButtonTitleColor;
@@ -629,7 +642,7 @@ static CGFloat const kLGActionSheetButtonHeight         = 44.f;
         cell.adjustsFontSizeToFitWidth  = _buttonsAdjustsFontSizeToFitWidth;
         cell.minimumScaleFactor         = _buttonsMinimumScaleFactor;
     }
-    
+
     return cell;
 }
 
@@ -640,7 +653,7 @@ static CGFloat const kLGActionSheetButtonHeight         = 44.f;
     if (_destructiveButtonTitle.length && indexPath.row == 0 && _destructiveButtonNumberOfLines != 1)
     {
         NSString *title = _buttonTitles[indexPath.row];
-        
+
         UILabel *label = [UILabel new];
         label.text = title;
         label.textAlignment             = _destructiveButtonTextAlignment;
@@ -649,19 +662,19 @@ static CGFloat const kLGActionSheetButtonHeight         = 44.f;
         label.lineBreakMode             = _destructiveButtonLineBreakMode;
         label.adjustsFontSizeToFitWidth = _destructiveButtonAdjustsFontSizeToFitWidth;
         label.minimumScaleFactor        = _destructiveButtonMinimumScaleFactor;
-        
-        CGSize size = [label sizeThatFits:CGSizeMake(tableView.frame.size.width-kLGActionSheetInnerMarginW*2, CGFLOAT_MAX)];
+
+        CGSize size = [label sizeThatFits:CGSizeMake(tableView.frame.size.width-kLGActionSheetPaddingW*2, CGFLOAT_MAX)];
         size.height += kLGActionSheetButtonTitleMarginH*2;
-        
-        if (size.height < kLGActionSheetButtonHeight)
-            size.height = kLGActionSheetButtonHeight;
-        
+
+        if (size.height < _buttonsHeight)
+            size.height = _buttonsHeight;
+
         return size.height;
     }
     else if (_buttonsNumberOfLines != 1)
     {
         NSString *title = _buttonTitles[indexPath.row];
-        
+
         UILabel *label = [UILabel new];
         label.text = title;
         label.textAlignment             = _buttonsTextAlignment;
@@ -670,16 +683,16 @@ static CGFloat const kLGActionSheetButtonHeight         = 44.f;
         label.lineBreakMode             = _buttonsLineBreakMode;
         label.adjustsFontSizeToFitWidth = _buttonsAdjustsFontSizeToFitWidth;
         label.minimumScaleFactor        = _buttonsMinimumScaleFactor;
-        
-        CGSize size = [label sizeThatFits:CGSizeMake(tableView.frame.size.width-kLGActionSheetInnerMarginW*2, CGFLOAT_MAX)];
+
+        CGSize size = [label sizeThatFits:CGSizeMake(tableView.frame.size.width-kLGActionSheetPaddingW*2, CGFLOAT_MAX)];
         size.height += kLGActionSheetButtonTitleMarginH*2;
-        
-        if (size.height < kLGActionSheetButtonHeight)
-            size.height = kLGActionSheetButtonHeight;
-        
+
+        if (size.height < _buttonsHeight)
+            size.height = _buttonsHeight;
+
         return size.height;
     }
-    else return kLGActionSheetButtonHeight;
+    else return _buttonsHeight;
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
@@ -691,14 +704,14 @@ static CGFloat const kLGActionSheetButtonHeight         = 44.f;
     else
     {
         [self dismissAnimated:YES completionHandler:nil];
-        
+
         NSUInteger index = indexPath.row;
         if (_destructiveButtonTitle.length) index--;
-        
+
         NSString *title = _buttonTitles[indexPath.row];
-        
+
         if (_actionHandler) _actionHandler(self, title, index);
-        
+
         if (_delegate && [_delegate respondsToSelector:@selector(actionSheet:buttonPressedWithTitle:index:)])
             [_delegate actionSheet:self buttonPressedWithTitle:title index:index];
     }
@@ -709,32 +722,37 @@ static CGFloat const kLGActionSheetButtonHeight         = 44.f;
 - (void)showAnimated:(BOOL)animated completionHandler:(void(^)())completionHandler
 {
     if (self.isShowing) return;
-    
+
     CGSize size = _viewController.view.frame.size;
-    
-    if (UIInterfaceOrientationIsPortrait([UIApplication sharedApplication].statusBarOrientation))
-        size = CGSizeMake(MIN(size.width, size.height), MAX(size.width, size.height));
-    else
-        size = CGSizeMake(MAX(size.width, size.height), MIN(size.width, size.height));
-    
+
+    if ([UIDevice currentDevice].systemVersion.floatValue < 8.0)
+    {
+        if (UIInterfaceOrientationIsPortrait([UIApplication sharedApplication].statusBarOrientation))
+            size = CGSizeMake(MIN(size.width, size.height), MAX(size.width, size.height));
+        else
+            size = CGSizeMake(MAX(size.width, size.height), MIN(size.width, size.height));
+
+        _viewController.view.frame = CGRectMake(0.f, 0.f, size.width, size.height);
+    }
+
     [self subviewsInvalidateWithSize:size];
     [self layoutInvalidateWithSize:size];
-    
+
     _showing = YES;
-    
+
     [_window makeKeyAndVisible];
-    
+
     // -----
-    
+
     [[NSNotificationCenter defaultCenter] postNotificationName:kLGActionSheetWillShowNotification object:self userInfo:nil];
-    
+
     if (_willShowHandler) _willShowHandler(self);
-    
+
     if (_delegate && [_delegate respondsToSelector:@selector(actionSheetWillShow:)])
         [_delegate actionSheetWillShow:self];
-    
+
     // -----
-    
+
     if (animated)
     {
         [LGActionSheet animateStandardWithAnimations:^(void)
@@ -744,16 +762,16 @@ static CGFloat const kLGActionSheetButtonHeight         = 44.f;
                                           completion:^(BOOL finished)
          {
              [self showComplete];
-             
+
              if (completionHandler) completionHandler();
          }];
     }
     else
     {
         [self showAnimations];
-        
+
         [self showComplete];
-        
+
         if (completionHandler) completionHandler();
     }
 }
@@ -761,26 +779,26 @@ static CGFloat const kLGActionSheetButtonHeight         = 44.f;
 - (void)showAnimations
 {
     _backgroundView.alpha = 1.f;
-    
+
     if (_transitionStyle == LGActionSheetTransitionStyleBottom)
     {
         _scrollView.center = _scrollViewCenterShowed;
-        
+
         _styleView.center = _scrollViewCenterShowed;
     }
     else
     {
         _scrollView.transform = CGAffineTransformIdentity;
         _scrollView.alpha = 1.f;
-        
+
         _styleView.transform = CGAffineTransformIdentity;
         _styleView.alpha = 1.f;
     }
-    
+
     if (_cancelButton)
     {
         _cancelButton.center = _cancelButtonCenterShowed;
-        
+
         _styleCancelView.center = _cancelButtonCenterShowed;
     }
 }
@@ -788,9 +806,9 @@ static CGFloat const kLGActionSheetButtonHeight         = 44.f;
 - (void)showComplete
 {
     [[NSNotificationCenter defaultCenter] postNotificationName:kLGActionSheetDidShowNotification object:self userInfo:nil];
-    
+
     if (_didShowHandler) _didShowHandler(self);
-    
+
     if (_delegate && [_delegate respondsToSelector:@selector(actionSheetDidShow:)])
         [_delegate actionSheetDidShow:self];
 }
@@ -798,22 +816,22 @@ static CGFloat const kLGActionSheetButtonHeight         = 44.f;
 - (void)dismissAnimated:(BOOL)animated completionHandler:(void (^)())completionHandler
 {
     if (!self.isShowing) return;
-    
+
     _showing = NO;
-    
+
     [self removeObservers];
-    
+
     // -----
-    
+
     [[NSNotificationCenter defaultCenter] postNotificationName:kLGActionSheetWillDismissNotification object:self userInfo:nil];
-    
+
     if (_willDismissHandler) _willDismissHandler(self);
-    
+
     if (_delegate && [_delegate respondsToSelector:@selector(actionSheetWillDismiss:)])
         [_delegate actionSheetWillDismiss:self];
-    
+
     // -----
-    
+
     if (animated)
     {
         [LGActionSheet animateStandardWithAnimations:^(void)
@@ -823,16 +841,16 @@ static CGFloat const kLGActionSheetButtonHeight         = 44.f;
                                           completion:^(BOOL finished)
          {
              [self dismissComplete];
-             
+
              if (completionHandler) completionHandler();
          }];
     }
     else
     {
         [self dismissAnimations];
-        
+
         [self dismissComplete];
-        
+
         if (completionHandler) completionHandler();
     }
 }
@@ -840,26 +858,26 @@ static CGFloat const kLGActionSheetButtonHeight         = 44.f;
 - (void)dismissAnimations
 {
     _backgroundView.alpha = 0.f;
-    
+
     if (_transitionStyle == LGActionSheetTransitionStyleBottom)
     {
         _scrollView.center = _scrollViewCenterHidden;
-        
+
         _styleView.center = _scrollViewCenterHidden;
     }
     else
     {
         _scrollView.transform = CGAffineTransformMakeScale(0.95, 0.95);
         _scrollView.alpha = 0.f;
-        
+
         _styleView.transform = CGAffineTransformMakeScale(0.95, 0.95);
         _styleView.alpha = 0.f;
     }
-    
+
     if (_cancelButton)
     {
         _cancelButton.center = _cancelButtonCenterHidden;
-        
+
         _styleCancelView.center = _cancelButtonCenterHidden;
     }
 }
@@ -867,18 +885,18 @@ static CGFloat const kLGActionSheetButtonHeight         = 44.f;
 - (void)dismissComplete
 {
     _window.hidden = YES;
-    
+
     [_windowPrevious makeKeyAndVisible];
-    
+
     self.viewController = nil;
     self.window = nil;
-    
+
     // -----
-    
+
     [[NSNotificationCenter defaultCenter] postNotificationName:kLGActionSheetDidDismissNotification object:self userInfo:nil];
-    
+
     if (_didDismissHandler) _didDismissHandler(self);
-    
+
     if (_delegate && [_delegate respondsToSelector:@selector(actionSheetDidDismiss:)])
         [_delegate actionSheetDidDismiss:self];
 }
@@ -887,29 +905,30 @@ static CGFloat const kLGActionSheetButtonHeight         = 44.f;
 
 - (void)subviewsInvalidateWithSize:(CGSize)size
 {
-    CGFloat widthMax = MIN(size.width, size.height)-kLGActionSheetMargin*2;
-    if (_transitionStyle == LGActionSheetTransitionStyleCenter)
-        widthMax = kLGActionSheetWidth;
-    else if (_widthMax && _widthMax < widthMax)
-        widthMax = _widthMax;
-    
+    CGFloat width = MIN(size.width, size.height)-kLGActionSheetOffsetAround*2;
+
+    if (_width > 0)
+    {
+        width = MIN(size.width, size.height);
+
+        if (_width < width) width = _width;
+    }
+    else if (_transitionStyle == LGActionSheetTransitionStyleCenter)
+        width = kLGActionSheetWidthTSCenter;
+
     // -----
-    
+
     if (!self.isExists)
     {
         _exists = YES;
-        
+
         _backgroundView.backgroundColor = _coverColor;
-        
+
         _styleView = [UIView new];
         _styleView.backgroundColor = _backgroundColor;
         _styleView.layer.masksToBounds = NO;
-        
-        CGFloat cornerRadius = (_transitionStyle == LGActionSheetTransitionStyleBottom ? kLGActionSheetCornerRadiusTSBottom : kLGActionSheetCornerRadiusTSCenter);
-        if (_layerCornerRadius >= 0)
-            cornerRadius = _layerCornerRadius;
-        
-        _styleView.layer.cornerRadius = cornerRadius;
+
+        _styleView.layer.cornerRadius = kLGActionSheetCornerRadius;
         _styleView.layer.borderColor = _layerBorderColor.CGColor;
         _styleView.layer.borderWidth = _layerBorderWidth;
         _styleView.layer.shadowColor = _layerShadowColor.CGColor;
@@ -917,17 +936,17 @@ static CGFloat const kLGActionSheetButtonHeight         = 44.f;
         _styleView.layer.shadowOpacity = 1.f;
         _styleView.layer.shadowOffset = CGSizeZero;
         [_view addSubview:_styleView];
-        
+
         _scrollView = [UIScrollView new];
         _scrollView.backgroundColor = [UIColor clearColor];
         _scrollView.indicatorStyle = _indicatorStyle;
         _scrollView.alwaysBounceVertical = NO;
         _scrollView.layer.masksToBounds = YES;
-        _scrollView.layer.cornerRadius = cornerRadius;
+        _scrollView.layer.cornerRadius = kLGActionSheetCornerRadius;
         [_view addSubview:_scrollView];
-        
+
         CGFloat offsetY = 0.f;
-        
+
         if (_title.length)
         {
             _titleLabel = [UILabel new];
@@ -938,38 +957,38 @@ static CGFloat const kLGActionSheetButtonHeight         = 44.f;
             _titleLabel.lineBreakMode = NSLineBreakByWordWrapping;
             _titleLabel.backgroundColor = [UIColor clearColor];
             _titleLabel.font = _titleFont;
-            
-            CGSize titleLabelSize = [_titleLabel sizeThatFits:CGSizeMake(widthMax-kLGActionSheetInnerMarginW*2, CGFLOAT_MAX)];
-            CGRect titleLabelFrame = CGRectMake(kLGActionSheetInnerMarginW, kLGActionSheetTitleMarginH, widthMax-kLGActionSheetInnerMarginW*2, titleLabelSize.height);
+
+            CGSize titleLabelSize = [_titleLabel sizeThatFits:CGSizeMake(width-kLGActionSheetPaddingW*2, CGFLOAT_MAX)];
+            CGRect titleLabelFrame = CGRectMake(kLGActionSheetPaddingW, kLGActionSheetTitleMarginH, width-kLGActionSheetPaddingW*2, titleLabelSize.height);
             if ([UIScreen mainScreen].scale == 1.f)
                 titleLabelFrame = CGRectIntegral(titleLabelFrame);
-            
+
             _titleLabel.frame = titleLabelFrame;
             [_scrollView addSubview:_titleLabel];
-            
+
             offsetY = _titleLabel.frame.origin.y+_titleLabel.frame.size.height;
         }
-        
+
         if (_innerView)
         {
-            CGRect innerViewFrame = CGRectMake(widthMax/2-_innerView.frame.size.width/2, offsetY+kLGActionSheetTitleMarginH, _innerView.frame.size.width, _innerView.frame.size.height);
+            CGRect innerViewFrame = CGRectMake(width/2-_innerView.frame.size.width/2, offsetY+kLGActionSheetTitleMarginH, _innerView.frame.size.width, _innerView.frame.size.height);
             if ([UIScreen mainScreen].scale == 1.f)
                 innerViewFrame = CGRectIntegral(innerViewFrame);
-            
+
             _innerView.frame = innerViewFrame;
             [_scrollView addSubview:_innerView];
-            
+
             offsetY = _innerView.frame.origin.y+_innerView.frame.size.height;
         }
-        
+
         if (_destructiveButtonTitle.length)
         {
             if (!_buttonTitles)
                 _buttonTitles = [NSMutableArray new];
-            
+
             [_buttonTitles insertObject:_destructiveButtonTitle atIndex:0];
         }
-        
+
         if (_buttonTitles.count)
         {
             _tableView = [[UITableView alloc] initWithFrame:CGRectZero style:UITableViewStylePlain];
@@ -980,50 +999,46 @@ static CGFloat const kLGActionSheetButtonHeight         = 44.f;
             _tableView.delegate = self;
             _tableView.scrollEnabled = NO;
             [_tableView registerClass:[LGActionSheetCell class] forCellReuseIdentifier:@"cell"];
-            _tableView.frame = CGRectMake(0.f, 0.f, widthMax, CGFLOAT_MAX);
+            _tableView.frame = CGRectMake(0.f, 0.f, width, CGFLOAT_MAX);
             [_tableView reloadData];
-            
+
             if (!offsetY) offsetY = -kLGActionSheetTitleMarginH;
             else
             {
                 _separatorView1 = [UIView new];
                 _separatorView1.backgroundColor = _separatorsColor;
-                
-                CGRect separatorView1Frame = CGRectMake(0.f, 0.f, widthMax, kLGActionSheetSeparatorHeight);
+
+                CGRect separatorView1Frame = CGRectMake(0.f, 0.f, width, kLGActionSheetSeparatorHeight);
                 if ([UIScreen mainScreen].scale == 1.f)
                     separatorView1Frame = CGRectIntegral(separatorView1Frame);
-                
+
                 _separatorView1.frame = separatorView1Frame;
                 _tableView.tableHeaderView = _separatorView1;
             }
-            
-            CGRect tableViewFrame = CGRectMake(0.f, offsetY+kLGActionSheetTitleMarginH, widthMax, _tableView.contentSize.height);
+
+            CGRect tableViewFrame = CGRectMake(0.f, offsetY+kLGActionSheetTitleMarginH, width, _tableView.contentSize.height);
             if ([UIScreen mainScreen].scale == 1.f)
                 tableViewFrame = CGRectIntegral(tableViewFrame);
             _tableView.frame = tableViewFrame;
-            
+
             [_scrollView addSubview:_tableView];
-            
+
             offsetY = _tableView.frame.origin.y+_tableView.frame.size.height;
         }
-        
+
         // -----
-        
-        _scrollView.contentSize = CGSizeMake(widthMax, offsetY);
-        
+
+        _scrollView.contentSize = CGSizeMake(width, offsetY);
+
         // -----
-        
+
         if (_cancelButtonTitle.length && _transitionStyle == LGActionSheetTransitionStyleBottom)
         {
             _styleCancelView = [UIView new];
             _styleCancelView.backgroundColor = _backgroundColor;
             _styleCancelView.layer.masksToBounds = NO;
-            
-            CGFloat cornerRadius = kLGActionSheetCornerRadiusTSBottom;
-            if (_layerCornerRadius >= 0)
-                cornerRadius = _layerCornerRadius;
-            
-            _styleCancelView.layer.cornerRadius = cornerRadius;
+
+            _styleCancelView.layer.cornerRadius = kLGActionSheetCornerRadius;
             _styleCancelView.layer.borderColor = _layerBorderColor.CGColor;
             _styleCancelView.layer.borderWidth = _layerBorderWidth;
             _styleCancelView.layer.shadowColor = _layerShadowColor.CGColor;
@@ -1031,7 +1046,7 @@ static CGFloat const kLGActionSheetButtonHeight         = 44.f;
             _styleCancelView.layer.shadowOpacity = 1.f;
             _styleCancelView.layer.shadowOffset = CGSizeZero;
             [_view insertSubview:_styleCancelView belowSubview:_scrollView];
-            
+
             _cancelButton = [UIButton new];
             _cancelButton.backgroundColor = [UIColor clearColor];
             _cancelButton.titleLabel.numberOfLines = _cancelButtonNumberOfLines;
@@ -1045,7 +1060,7 @@ static CGFloat const kLGActionSheetButtonHeight         = 44.f;
             [_cancelButton setTitleColor:_cancelButtonTitleColorHighlighted forState:UIControlStateSelected];
             [_cancelButton setBackgroundImage:[LGActionSheet image1x1WithColor:_cancelButtonBackgroundColorHighlighted] forState:UIControlStateHighlighted];
             [_cancelButton setBackgroundImage:[LGActionSheet image1x1WithColor:_cancelButtonBackgroundColorHighlighted] forState:UIControlStateSelected];
-            _cancelButton.contentEdgeInsets = UIEdgeInsetsMake(kLGActionSheetButtonTitleMarginH, kLGActionSheetInnerMarginW, kLGActionSheetButtonTitleMarginH, kLGActionSheetInnerMarginW);
+            _cancelButton.contentEdgeInsets = UIEdgeInsetsMake(kLGActionSheetButtonTitleMarginH, kLGActionSheetPaddingW, kLGActionSheetButtonTitleMarginH, kLGActionSheetPaddingW);
             _cancelButton.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
             if (_cancelButtonTextAlignment == NSTextAlignmentCenter)
                 _cancelButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentCenter;
@@ -1054,20 +1069,20 @@ static CGFloat const kLGActionSheetButtonHeight         = 44.f;
             else if (_cancelButtonTextAlignment == NSTextAlignmentRight)
                 _cancelButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentRight;
             _cancelButton.layer.masksToBounds = YES;
-            _cancelButton.layer.cornerRadius = cornerRadius;
+            _cancelButton.layer.cornerRadius = kLGActionSheetCornerRadius;
             [_cancelButton addTarget:self action:@selector(cancelAction:) forControlEvents:UIControlEventTouchUpInside];
             [_view addSubview:_cancelButton];
         }
-        
+
         // -----
-        
+
         [self addObservers];
-        
+
         // -----
-        
+
         UIWindow *windowApp = [UIApplication sharedApplication].delegate.window;
         _windowPrevious = [UIApplication sharedApplication].keyWindow;
-        
+
         if (![windowApp isEqual:_windowPrevious])
             _windowPrevious.hidden = YES;
     }
@@ -1076,98 +1091,103 @@ static CGFloat const kLGActionSheetButtonHeight         = 44.f;
 - (void)layoutInvalidateWithSize:(CGSize)size
 {
     _view.frame = CGRectMake(0.f, 0.f, size.width, size.height);
-    
+
     _backgroundView.frame = CGRectMake(0.f, 0.f, size.width, size.height);
-    
+
     // -----
-    
-    CGFloat widthMax = MIN(size.width, size.height)-kLGActionSheetMargin*2;
-    if (_transitionStyle == LGActionSheetTransitionStyleCenter)
-        widthMax = kLGActionSheetWidth;
-    else if (_widthMax && _widthMax < widthMax)
-        widthMax = _widthMax;
-    
+
+    CGFloat width = MIN(size.width, size.height)-kLGActionSheetOffsetAround*2;
+
+    if (_width > 0)
+    {
+        width = MIN(size.width, size.height);
+
+        if (_width < width) width = _width;
+    }
+    else if (_transitionStyle == LGActionSheetTransitionStyleCenter)
+        width = kLGActionSheetWidthTSCenter;
+
     // -----
-    
-    CGFloat heightMax = size.height-kLGActionSheetMargin*2;
-    
+
+    CGFloat heightMax = size.height-kLGActionSheetOffsetAround*2;
+
     if (_cancelButton)
-        heightMax -= (kLGActionSheetButtonHeight+kLGActionSheetMargin);
+        heightMax -= (_buttonsHeight+kLGActionSheetOffsetAround);
     else if (_transitionStyle == LGActionSheetTransitionStyleCenter &&
              _cancelOnTouch &&
-             size.width < widthMax+kLGActionSheetButtonHeight*2)
-        heightMax -= kLGActionSheetButtonHeight*2;
-    
-    if (_heightMax && _heightMax < heightMax)
+             size.width < width+_buttonsHeight*2)
+        heightMax -= _buttonsHeight*2;
+
+    if (_heightMax > 0 && _heightMax < heightMax)
         heightMax = _heightMax;
-    
+
     if (_scrollView.contentSize.height < heightMax)
         heightMax = _scrollView.contentSize.height;
-    
+
     // -----
-    
+
     CGRect scrollViewFrame = CGRectZero;
     CGAffineTransform scrollViewTransform = CGAffineTransformIdentity;
     CGFloat scrollViewAlpha = 1.f;
-    
+
     if (_transitionStyle == LGActionSheetTransitionStyleBottom)
     {
-        CGFloat bottomShift = kLGActionSheetMargin;
+        CGFloat bottomShift = kLGActionSheetOffsetAround;
         if (_cancelButton)
-            bottomShift += kLGActionSheetButtonHeight+kLGActionSheetMargin;
-        
-        scrollViewFrame = CGRectMake(size.width/2-widthMax/2, size.height-bottomShift-heightMax, widthMax, heightMax);
+            bottomShift += _buttonsHeight+kLGActionSheetOffsetAround;
+
+        scrollViewFrame = CGRectMake(size.width/2-width/2, size.height-bottomShift-heightMax, width, heightMax);
     }
     else
     {
-        scrollViewFrame = CGRectMake(size.width/2-widthMax/2, size.height/2-heightMax/2, widthMax, heightMax);
-        
+        scrollViewFrame = CGRectMake(size.width/2-width/2, size.height/2-heightMax/2, width, heightMax);
+
         if (!self.isShowing)
         {
             scrollViewTransform = CGAffineTransformMakeScale(1.2, 1.2);
-            
+
             scrollViewAlpha = 0.f;
         }
     }
-    
+
     if ([UIScreen mainScreen].scale == 1.f)
     {
         scrollViewFrame = CGRectIntegral(scrollViewFrame);
-        
+
         if (_tableView && _tableView.frame.origin.y+_tableView.frame.size.height < scrollViewFrame.size.height)
             scrollViewFrame.size.height = _tableView.frame.origin.y+_tableView.frame.size.height;
     }
-    
+
     // -----
-    
+
     if (_transitionStyle == LGActionSheetTransitionStyleBottom)
     {
         CGRect cancelButtonFrame = CGRectZero;
         if (_cancelButton)
         {
-            cancelButtonFrame = CGRectMake(size.width/2-widthMax/2, size.height-kLGActionSheetMargin-kLGActionSheetButtonHeight, widthMax, kLGActionSheetButtonHeight);
+            cancelButtonFrame = CGRectMake(size.width/2-width/2, size.height-kLGActionSheetOffsetAround-_buttonsHeight, width, _buttonsHeight);
             if ([UIScreen mainScreen].scale == 1.f)
                 cancelButtonFrame = CGRectIntegral(cancelButtonFrame);
         }
-        
+
         _scrollViewCenterShowed = CGPointMake(scrollViewFrame.origin.x+scrollViewFrame.size.width/2, scrollViewFrame.origin.y+scrollViewFrame.size.height/2);
         _cancelButtonCenterShowed = CGPointMake(cancelButtonFrame.origin.x+cancelButtonFrame.size.width/2, cancelButtonFrame.origin.y+cancelButtonFrame.size.height/2);
-        
+
         // -----
-        
-        CGFloat commonHeight = scrollViewFrame.size.height+kLGActionSheetMargin;
+
+        CGFloat commonHeight = scrollViewFrame.size.height+kLGActionSheetOffsetAround;
         if (_cancelButton)
-            commonHeight += kLGActionSheetButtonHeight+kLGActionSheetMargin;
-        
+            commonHeight += _buttonsHeight+kLGActionSheetOffsetAround;
+
         _scrollViewCenterHidden = CGPointMake(scrollViewFrame.origin.x+scrollViewFrame.size.width/2, scrollViewFrame.origin.y+scrollViewFrame.size.height/2+commonHeight+_layerBorderWidth+_layerShadowRadius);
         _cancelButtonCenterHidden = CGPointMake(cancelButtonFrame.origin.x+cancelButtonFrame.size.width/2, cancelButtonFrame.origin.y+cancelButtonFrame.size.height/2+commonHeight);
-        
+
         if (!self.isShowing)
         {
             scrollViewFrame.origin.y += commonHeight;
             if ([UIScreen mainScreen].scale == 1.f)
                 scrollViewFrame = CGRectIntegral(scrollViewFrame);
-            
+
             if (_cancelButton)
             {
                 cancelButtonFrame.origin.y += commonHeight;
@@ -1175,24 +1195,24 @@ static CGFloat const kLGActionSheetButtonHeight         = 44.f;
                     cancelButtonFrame = CGRectIntegral(cancelButtonFrame);
             }
         }
-        
+
         // -----
-        
+
         if (_cancelButton)
         {
             _cancelButton.frame = cancelButtonFrame;
-            
+
             CGFloat borderWidth = _layerBorderWidth;
             _styleCancelView.frame = CGRectMake(cancelButtonFrame.origin.x-borderWidth, cancelButtonFrame.origin.y-borderWidth, cancelButtonFrame.size.width+borderWidth*2, cancelButtonFrame.size.height+borderWidth*2);
         }
     }
-    
+
     // -----
-    
+
     _scrollView.frame = scrollViewFrame;
     _scrollView.transform = scrollViewTransform;
     _scrollView.alpha = scrollViewAlpha;
-    
+
     CGFloat borderWidth = _layerBorderWidth;
     _styleView.frame = CGRectMake(scrollViewFrame.origin.x-borderWidth, scrollViewFrame.origin.y-borderWidth, scrollViewFrame.size.width+borderWidth*2, scrollViewFrame.size.height+borderWidth*2);
     _styleView.transform = scrollViewTransform;
@@ -1204,7 +1224,7 @@ static CGFloat const kLGActionSheetButtonHeight         = 44.f;
 - (void)cancelAction:(id)sender
 {
     BOOL onButton = [sender isKindOfClass:[UIButton class]];
-    
+
     if (sender)
     {
         if (onButton)
@@ -1212,13 +1232,13 @@ static CGFloat const kLGActionSheetButtonHeight         = 44.f;
         else if ([sender isKindOfClass:[UIGestureRecognizer class]] && !self.isCancelOnTouch)
             return;
     }
-    
+
     [self dismissAnimated:YES completionHandler:nil];
-    
+
     // -----
-    
+
     if (_cancelHandler) _cancelHandler(self, onButton);
-    
+
     if (_delegate && [_delegate respondsToSelector:@selector(actionSheetCancelled:)])
         [_delegate actionSheetCancelled:self];
 }
@@ -1227,11 +1247,11 @@ static CGFloat const kLGActionSheetButtonHeight         = 44.f;
 {
     if (sender && [sender isKindOfClass:[UIButton class]])
         [(UIButton *)sender setSelected:YES];
-    
+
     [self dismissAnimated:YES completionHandler:nil];
-    
+
     if (_destructiveHandler) _destructiveHandler(self);
-    
+
     if (_delegate && [_delegate respondsToSelector:@selector(actionSheetDestructiveButtonPressed:)])
         [_delegate actionSheetDestructiveButtonPressed:self];
 }
@@ -1263,17 +1283,17 @@ static CGFloat const kLGActionSheetButtonHeight         = 44.f;
 + (UIImage *)image1x1WithColor:(UIColor *)color
 {
     CGRect rect = CGRectMake(0.f, 0.f, 1.f, 1.f);
-    
+
     UIGraphicsBeginImageContext(rect.size);
-    
+
     CGContextRef context = UIGraphicsGetCurrentContext();
-    
+
     CGContextSetFillColorWithColor(context, color.CGColor);
     CGContextFillRect(context, rect);
-    
+
     UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
-    
+
     return image;
 }
 
