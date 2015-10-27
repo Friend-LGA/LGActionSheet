@@ -56,8 +56,8 @@ static CGFloat const kLGActionSheetButtonTitleMarginH   = 8.f;
 @property (assign, nonatomic, getter=isExists) BOOL exists;
 
 @property (strong, nonatomic) UIWindow *window;
-@property (assign, nonatomic) UIWindow *windowPrevious;
-@property (assign, nonatomic) UIWindow *windowNotice;
+@property (strong, nonatomic) UIWindow *windowPrevious;
+@property (strong, nonatomic) UIWindow *windowNotice;
 
 @property (strong, nonatomic) UIView *view;
 
@@ -178,6 +178,11 @@ static CGFloat const kLGActionSheetButtonTitleMarginH   = 8.f;
 }
 
 #endif
+
+- (UIStatusBarStyle)preferredStatusBarStyle
+{
+    return [UIApplication sharedApplication].statusBarStyle;
+}
 
 @end
 
@@ -510,13 +515,17 @@ static CGFloat const kLGActionSheetButtonTitleMarginH   = 8.f;
 
     UIWindow *window = notification.object;
 
+    //NSLog(@"%@", NSStringFromClass([window class]));
+
+    if ([window isEqual:_window]) return;
+
     if (notification.name == UIWindowDidBecomeVisibleNotification)
     {
         if ([window isEqual:_windowPrevious])
         {
             window.hidden = YES;
         }
-        else if (![window isEqual:_window] && !_windowNotice)
+        else if (!_windowNotice)
         {
             _windowNotice = window;
 
@@ -525,19 +534,11 @@ static CGFloat const kLGActionSheetButtonTitleMarginH   = 8.f;
     }
     else if (notification.name == UIWindowDidBecomeHiddenNotification)
     {
-        __weak UIView *view = window.subviews.lastObject;
-
-        if (![window isEqual:_window] && [window isEqual:_windowNotice])
+        if ([window isEqual:_windowNotice])
         {
-            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^(void)
-                           {
-                               if (!view)
-                               {
-                                   _windowNotice = nil;
+            _windowNotice = nil;
 
-                                   [_window makeKeyAndVisible];
-                               }
-                           });
+            [_window makeKeyAndVisible];
         }
     }
 }
