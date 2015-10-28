@@ -493,8 +493,6 @@ static CGFloat const kLGActionSheetButtonTitleMarginH   = 8.f;
 #if DEBUG
     NSLog(@"%s [Line %d]", __PRETTY_FUNCTION__, __LINE__);
 #endif
-
-    [self removeObservers];
 }
 
 #pragma mark - Observers
@@ -543,6 +541,13 @@ static CGFloat const kLGActionSheetButtonTitleMarginH   = 8.f;
             [_window makeKeyAndVisible];
         }
     }
+}
+
+#pragma mark - UIGestureRecognizer Delegate
+
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch
+{
+    return self.isCancelOnTouch;
 }
 
 #pragma mark - Setters and Getters
@@ -712,6 +717,13 @@ static CGFloat const kLGActionSheetButtonTitleMarginH   = 8.f;
         if (_destructiveButtonTitle.length) index--;
 
         NSString *title = _buttonTitles[indexPath.row];
+
+        // -----
+
+        [[NSNotificationCenter defaultCenter] postNotificationName:kLGActionSheetActionNotification
+                                                            object:self
+                                                          userInfo:@{@"title" : title,
+                                                                     @"index" : [NSNumber numberWithInteger:index]}];
 
         if (_actionHandler) _actionHandler(self, title, index);
 
@@ -891,9 +903,6 @@ static CGFloat const kLGActionSheetButtonTitleMarginH   = 8.f;
 
     [_windowPrevious makeKeyAndVisible];
 
-    self.viewController = nil;
-    self.window = nil;
-
     // -----
 
     [[NSNotificationCenter defaultCenter] postNotificationName:kLGActionSheetDidDismissNotification object:self userInfo:nil];
@@ -902,6 +911,14 @@ static CGFloat const kLGActionSheetButtonTitleMarginH   = 8.f;
 
     if (_delegate && [_delegate respondsToSelector:@selector(actionSheetDidDismiss:)])
         [_delegate actionSheetDidDismiss:self];
+
+    // -----
+
+    _view = nil;
+    _viewController = nil;
+    _windowNotice = nil;
+    _windowPrevious = nil;
+    _window = nil;
 }
 
 #pragma mark -
@@ -1226,19 +1243,18 @@ static CGFloat const kLGActionSheetButtonTitleMarginH   = 8.f;
 
 - (void)cancelAction:(id)sender
 {
-    BOOL onButton = [sender isKindOfClass:[UIButton class]];
+    BOOL onButton = ![sender isKindOfClass:[UIGestureRecognizer class]];
 
-    if (sender)
-    {
-        if (onButton)
-            [(UIButton *)sender setSelected:YES];
-        else if ([sender isKindOfClass:[UIGestureRecognizer class]] && !self.isCancelOnTouch)
-            return;
-    }
+    if (onButton)
+        [(UIButton *)sender setSelected:YES];
 
     [self dismissAnimated:YES completionHandler:nil];
 
     // -----
+
+    [[NSNotificationCenter defaultCenter] postNotificationName:kLGActionSheetCancelNotification
+                                                        object:self
+                                                      userInfo:@{@"onButton" : [NSNumber numberWithBool:onButton]}];
 
     if (_cancelHandler) _cancelHandler(self, onButton);
 
@@ -1252,6 +1268,10 @@ static CGFloat const kLGActionSheetButtonTitleMarginH   = 8.f;
         [(UIButton *)sender setSelected:YES];
 
     [self dismissAnimated:YES completionHandler:nil];
+
+    // -----
+
+    [[NSNotificationCenter defaultCenter] postNotificationName:kLGActionSheetDestructiveNotification object:self userInfo:nil];
 
     if (_destructiveHandler) _destructiveHandler(self);
 

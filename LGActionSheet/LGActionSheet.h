@@ -35,6 +35,9 @@ static NSString *const kLGActionSheetWillShowNotification    = @"LGActionSheetWi
 static NSString *const kLGActionSheetWillDismissNotification = @"LGActionSheetWillDismissNotification";
 static NSString *const kLGActionSheetDidShowNotification     = @"LGActionSheetDidShowNotification";
 static NSString *const kLGActionSheetDidDismissNotification  = @"LGActionSheetDidDismissNotification";
+static NSString *const kLGActionSheetActionNotification      = @"LGActionSheetActionNotification";
+static NSString *const kLGActionSheetCancelNotification      = @"LGActionSheetCancelNotification";
+static NSString *const kLGActionSheetDestructiveNotification = @"LGActionSheetDestructiveNotification";
 
 @protocol LGActionSheetDelegate <NSObject>
 
