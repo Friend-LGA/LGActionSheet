@@ -395,6 +395,9 @@ static CGFloat const kLGActionSheetButtonTitleMarginH   = 8.f;
 
 - (void)setupDefaults
 {
+    NSLog(@"LGActionSheet is not supported any more. Please, use LGAlertView instead.");
+    NSLog(@"https://github.com/Friend-LGA/LGAlertView");
+
     _transitionStyle = (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone ? LGActionSheetTransitionStyleBottom : LGActionSheetTransitionStyleCenter);
 
     _cancelOnTouch = YES;
@@ -1057,7 +1060,6 @@ static CGFloat const kLGActionSheetButtonTitleMarginH   = 8.f;
             _styleCancelView = [UIView new];
             _styleCancelView.backgroundColor = _backgroundColor;
             _styleCancelView.layer.masksToBounds = NO;
-
             _styleCancelView.layer.cornerRadius = kLGActionSheetCornerRadius;
             _styleCancelView.layer.borderColor = _layerBorderColor.CGColor;
             _styleCancelView.layer.borderWidth = _layerBorderWidth;
